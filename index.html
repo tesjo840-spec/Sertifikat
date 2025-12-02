@@ -254,25 +254,28 @@ function drawCertificate(canv, ctx, name) {
         ctx.fillRect(0, 0, 700, 500);
     }
 
-    ctx.fillStyle = "#333";
-    ctx.font = "bold 42px Poppins";
-    ctx.textAlign = "center";
-    ctx.fillText("SERTIFIKAT PENGHARGAAN", 350, 90);
+    // ctx.fillStyle = "#333";
+    // ctx.font = "bold 42px Poppins";
+    // ctx.textAlign = "center";
+    // ctx.fillText("SERTIFIKAT PENGHARGAAN", 350, 90);
 
-    ctx.font = "20px Poppins";
-    ctx.fillText("Diberikan kepada:", 350, 150);
+    // ctx.font = "20px Poppins";
+    // ctx.fillText("Diberikan kepada:", 350, 150);
 
     ctx.font = "bold 48px Poppins";
     ctx.fillStyle = "#000";
+    ctx.textAlign = "center";    
+    ctx.textBaseline = "middle"; 
+
     ctx.fillText(name, 350, 230);
 
-    ctx.font = "20px Poppins";
-    ctx.fillStyle = "#333";
-    ctx.fillText("Atas kontribusi luar biasa dalam kegiatan ini.", 350, 300);
+//     ctx.font = "20px Poppins";
+//     ctx.fillStyle = "#333";
+//     ctx.fillText("Atas kontribusi luar biasa dalam kegiatan ini.", 350, 300);
 
-    ctx.font = "18px Poppins";
-    ctx.fillText("Tanggal: " + new Date().toLocaleDateString("id-ID"), 350, 350);
-}
+//     ctx.font = "18px Poppins";
+//     ctx.fillText("Tanggal: " + new Date().toLocaleDateString("id-ID"), 350, 350);
+ }
 
 function generateCertificate() {
     const name = document.getElementById("nameInput").value.trim();
@@ -413,4 +416,3 @@ drawCertificate(canvas, ctx, "Nama Peserta");
 
 </body>
 </html>
-
