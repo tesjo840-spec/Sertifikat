@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ Generator Sertifikat Premium ✨</title>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(145deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 750px;
+            padding: 20px;
+            margin-top: 15px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.10);
+            box-shadow: 0 6px 28px rgba(0,0,0,0.35);
+            backdrop-filter: blur(12px);
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1, h2 {
+            text-shadow: 0 0 8px rgba(255,255,255,0.6);
+            font-weight: 700;
+            font-size: 1.6em;
+        }
+
+        input, button, textarea {
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: none;
+            outline: none;
+            margin: 8px;
+            font-size: 15px;
+        }
+
+        input, textarea {
+            width: 80%;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+        }
+
+        button {
+            background: linear-gradient(135deg, #ff8c00, #ff0057);
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255,0,100,0.4);
+            transition: 0.3s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 22px rgba(255,0,100,0.6);
+        }
+
+        .section { display: none; }
+        .active { display: block; }
+
+        .menu button {
+            margin: 4px;
+            font-size: 14px;
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            box-shadow: 0 4px 12px rgba(0,150,255,0.35);
+        }
+
+        canvas {
+            margin-top: 20px;
+            border-radius: 14px;
+            background: white;
+            width: 100%;
+            height: auto;
+            max-width: 650px;
+            border: 10px solid transparent;
+            background-image:
+                linear-gradient(white, white),
+                linear-gradient(45deg, gold, #ffda6b, #f2b600, gold);
+            background-origin: border-box;
+            background-clip: content-box, border-box;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.30);
+        }
+
+        .certificate-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .certificate-item {
+            margin: 10px;
+            text-align: center;
+        }
+
+        .certificate-item img {
+            width: 180px;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(255,255,255,0.2);
+            border: 3px solid gold;
+        }
+
+        .certificate-item button { margin-top: 8px; font-size: 13px; }
+
+        .footer {
+            margin-top: 25px;
+            opacity: 0.8;
+            font-size: 0.85em;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <!-- LOGIN -->
+    <div id="loginSection" class="container active">
+        <h1>🎖️ Generator Sertifikat Premium</h1>
+        <p>Masuk sebagai Admin atau lanjutkan sebagai Pengguna.</p>
+
+        <input type="text" id="username" placeholder="Username Admin">
+        <input type="password" id="password" placeholder="Password Admin">
+
+        <button onclick="login()">Login Admin</button>
+        <button onclick="guestLogin()">Lanjutkan sebagai Pengguna</button>
+    </div>
+
+    <!-- ADMIN MENU -->
+    <div id="adminMenuSection" class="container section">
+        <h2>Menu Admin</h2>
+        <div class="menu">
+            <button onclick="showSection('createSection')">Create Sertifikat</button>
+            <button onclick="showSection('bulkSection')">Bulk Create</button>
+            <button onclick="showSection('editSection')">Edit Template</button>
+            <button onclick="showSection('searchSection')">Cari Sertifikat</button>
+        </div>
+    </div>
+
+    <!-- USER MENU -->
+    <div id="userMenuSection" class="container section">
+        <h2>Menu Pengguna</h2>
+        <button onclick="showSection('searchSection')">Cari Sertifikat</button>
+    </div>
+
+    <!-- CREATE -->
+    <div id="createSection" class="container section">
+        <h2>Buat Sertifikat</h2>
+        <input type="text" id="nameInput" placeholder="Masukkan nama peserta">
+        <button onclick="generateRandomName()">Nama Acak</button>
+        <button onclick="generateCertificate()">Buat Sertifikat</button>
+        <button onclick="downloadCertificate()">Download</button>
+        <canvas id="certificateCanvas" width="700" height="500"></canvas>
+    </div>
+
+    <!-- BULK -->
+    <div id="bulkSection" class="container section">
+        <h2>Bulk Create Sertifikat</h2>
+        <p>Masukkan satu nama per baris:</p>
+        <textarea id="bulkInput" style="height:200px"></textarea>
+        <button onclick="generateBulk()">Generate Semua</button>
+        <div id="bulkResult" class="certificate-list"></div>
+    </div>
+
+    <!-- EDIT TEMPLATE -->
+    <div id="editSection" class="container section">
+        <h2>Edit Template Sertifikat</h2>
+        <input type="file" id="templateUpload" accept="image/*">
+        <button onclick="changeTemplate()">Upload Template</button>
+        <canvas id="editCanvas" width="700" height="500"></canvas>
+    </div>
+
+    <!-- SEARCH -->
+    <div id="searchSection" class="container section">
+        <h2>Cari Sertifikat</h2>
+        <input type="text" id="searchInput" placeholder="Cari nama">
+        <button onclick="searchCertificates()">Cari</button>
+        <div id="certificateList" class="certificate-list"></div>
+    </div>
+
+    <!-- HIDDEN BULK CANVAS -->
+    <canvas id="bulkCanvas" width="700" height="500" style="position:absolute; left:-9999px; top:-9999px;"></canvas>
+
+    <div class="footer">Dibuat dengan ❤️ menggunakan desain Ultra Premium</div>
+
+<script>
+
+let isAdmin = false;
+let certificates = JSON.parse(localStorage.getItem('certificates')) || [];
+let currentTemplate = null;
+let templateDataURL = localStorage.getItem('currentTemplate');
+
+if (templateDataURL) {
+    const img = new Image();
+    img.onload = () => {
+        currentTemplate = img;
+        drawCertificate(document.getElementById("certificateCanvas"), document.getElementById("certificateCanvas").getContext("2d"), "Nama Peserta");
+    };
+    img.src = templateDataURL;
+}
+
+function login() {
+    const user = document.getElementById("username").value;
+    const pass = document.getElementById("password").value;
+
+    if (user === "admin" && pass === "admin") {
+        isAdmin = true;
+        showSection("adminMenuSection");
+    } else {
+        alert("Login salah!");
+    }
+}
+
+function guestLogin() {
+    isAdmin = false;
+    showSection("userMenuSection");
+}
+
+function showSection(id) {
+    document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+}
+
+const canvas = document.getElementById("certificateCanvas");
+const ctx = canvas.getContext("2d");
+
+function drawCertificate(canv, ctx, name) {
+    ctx.clearRect(0, 0, canv.width, canv.height);
+
+    if (currentTemplate) {
+        ctx.drawImage(currentTemplate, 0, 0, canv.width, canv.height);
+    } else {
+        const grad = ctx.createLinearGradient(0, 0, 700, 500);
+        grad.addColorStop(0, "#fff7d1");
+        grad.addColorStop(1, "#ffe8a8");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 700, 500);
+    }
+
+    ctx.fillStyle = "#333";
+    ctx.font = "bold 42px Poppins";
+    ctx.textAlign = "center";
+    ctx.fillText("SERTIFIKAT PENGHARGAAN", 350, 90);
+
+    ctx.font = "20px Poppins";
+    ctx.fillText("Diberikan kepada:", 350, 150);
+
+    ctx.font = "bold 48px Poppins";
+    ctx.fillStyle = "#000";
+    ctx.fillText(name, 350, 230);
+
+    ctx.font = "20px Poppins";
+    ctx.fillStyle = "#333";
+    ctx.fillText("Atas kontribusi luar biasa dalam kegiatan ini.", 350, 300);
+
+    ctx.font = "18px Poppins";
+    ctx.fillText("Tanggal: " + new Date().toLocaleDateString("id-ID"), 350, 350);
+}
+
+function generateCertificate() {
+    const name = document.getElementById("nameInput").value.trim();
+    if (!name) return alert("Masukkan nama peserta!");
+
+    drawCertificate(canvas, ctx, name);
+    saveCertificate(name);
+}
+
+function saveCertificate(name) {
+    html2canvas(canvas).then(img => {
+        const dataURL = img.toDataURL();
+        certificates.push({ name, dataURL });
+        localStorage.setItem("certificates", JSON.stringify(certificates));
+        alert("Sertifikat berhasil disimpan!");
+    });
+}
+
+function downloadCertificate() {
+    html2canvas(canvas).then(canvasImage => {
+        const link = document.createElement("a");
+        link.download = "sertifikat.png";
+        link.href = canvasImage.toDataURL();
+        link.click();
+    });
+}
+
+const randomNames = ["Lukman", "Rizky", "Sari", "Aulia", "Dewi", "Rafi", "Samsul", "Anisa"];
+function generateRandomName() {
+    document.getElementById("nameInput").value =
+        randomNames[Math.floor(Math.random() * randomNames.length)];
+}
+
+async function generateBulk() {
+    const raw = document.getElementById("bulkInput").value.trim();
+    if (!raw) return alert("Masukkan nama!");
+
+    const names = raw.split("\n").map(n => n.trim()).filter(n => n);
+    if (names.length === 0) return alert("Tidak ada nama valid!");
+
+    const resultDiv = document.getElementById("bulkResult");
+    resultDiv.innerHTML = "⏳ Sedang membuat sertifikat...";
+
+    const bulkCanvas = document.getElementById("bulkCanvas");
+    const bulkCtx = bulkCanvas.getContext("2d");
+
+    const results = [];
+
+    for (const name of names) {
+        drawCertificate(bulkCanvas, bulkCtx, name);
+
+        // ambil langsung dari canvas (lebih akurat daripada html2canvas)
+        const dataURL = bulkCanvas.toDataURL("image/png");
+
+        certificates.push({ name, dataURL });
+        results.push({ name, dataURL });
+    }
+
+    localStorage.setItem("certificates", JSON.stringify(certificates));
+
+    resultDiv.innerHTML = results.map(({ name, dataURL }) => `
+        <div class="certificate-item">
+            <img src="${dataURL}">
+            <br>${name}
+            <br><button onclick="downloadSpecific('${dataURL}', '${name}')">Download</button>
+            ${isAdmin ? `<button onclick="deleteCertificate('${name}')">Hapus</button>` : ''}
+        </div>
+    `).join('');
+}
+
+function downloadSpecific(dataURL, name) {
+    const link = document.createElement("a");
+    link.download = `sertifikat_${name}.png`;
+    link.href = dataURL;
+    link.click();
+}
+
+function deleteCertificate(name) {
+    if (!isAdmin) return alert("Hanya admin yang bisa menghapus sertifikat!");
+    if (!confirm(`Hapus sertifikat untuk ${name}?`)) return;
+
+    certificates = certificates.filter(c => c.name !== name);
+    localStorage.setItem("certificates", JSON.stringify(certificates));
+
+    alert("Berhasil dihapus!");
+    searchCertificates();
+}
+
+const editCanvas = document.getElementById("editCanvas");
+const editCtx = editCanvas.getContext("2d");
+
+function changeTemplate() {
+    const file = document.getElementById("templateUpload").files[0];
+    if (!file) return alert("Pilih file gambar!");
+
+    const reader = new FileReader();
+    reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+            currentTemplate = img;
+            templateDataURL = e.target.result;
+            localStorage.setItem('currentTemplate', templateDataURL);
+            editCtx.drawImage(img, 0, 0, editCanvas.width, editCanvas.height);
+            drawCertificate(canvas, ctx, "Nama Peserta");
+            alert("Template berhasil diubah!");
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function searchCertificates() {
+    const query = document.getElementById("searchInput").value.toLowerCase().trim();
+    const list = document.getElementById("certificateList");
+    list.innerHTML = "";
+
+    const filtered = certificates.filter(c => c.name.toLowerCase().includes(query));
+    if (filtered.length === 0) {
+        list.innerHTML = "<p>Tidak ada sertifikat ditemukan.</p>";
+        return;
+    }
+
+    filtered.forEach(c => {
+        list.innerHTML += `
+            <div class="certificate-item">
+                <img src="${c.dataURL}">
+                <br>${c.name}
+                <br><button onclick="downloadSpecific('${c.dataURL}', '${c.name}')">Download</button>
+                ${isAdmin ? `<button onclick="deleteCertificate('${c.name}')">Hapus</button>` : ''}
+            </div>
+        `;
+    });
+}
+
+drawCertificate(canvas, ctx, "Nama Peserta");
+
+</script>
+
+</body>
+</html>
