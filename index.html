@@ -1,473 +1,326 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✨ Generator Sertifikat ✨</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✨ Generator Sertifikat ✨</title>
 
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<!-- html2canvas -->
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
-    <style>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-        /* ===================== WARNA PALLET ===================== */
-        :root {
-            --dark-blue: #2D378C;
-            --blue-green: #137389;
-            --sky-blue: #32A2DB;
-            --soft-blue: #BEDCF0;
-            --green: #00A550;
-        }
+<style>
+:root {
+    --dark-blue: #2D378C;
+    --blue-green: #137389;
+    --sky-blue: #32A2DB;
+    --soft-blue: #BEDCF0;
+    --green: #00A550;
+}
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(145deg, var(--dark-blue), var(--blue-green), var(--sky-blue));
+    min-height: 100vh; margin: 0; padding: 10px; color: white;
+    display: flex; flex-direction: column; align-items: center;
+}
+.container {
+    width: 95%; max-width: 750px; padding: 20px; margin-top: 15px;
+    border-radius: 15px; background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(14px); box-shadow: 0 6px 28px rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.25); text-align: center;
+}
+h1,h2 { text-shadow:0 0 8px rgba(255,255,255,0.6); font-weight:700; }
+input,textarea { width:80%; padding:12px 16px; border-radius:12px; border:1px solid rgba(45,55,140,0.35); background: rgba(255,255,255,0.85); color:#1a1a1a; margin:8px; font-size:15px; box-shadow: inset 0 0 5px rgba(0,0,0,0.12);}
+input::placeholder,textarea::placeholder{color:rgba(0,0,0,0.55);}
+input:focus,textarea:focus{background: rgba(255,255,255,0.95); border:1px solid var(--sky-blue); box-shadow:0 0 8px rgba(50,162,219,0.4); outline:none;}
+button {padding:10px 18px; border-radius:12px; border:none; background:linear-gradient(135deg,var(--blue-green),var(--sky-blue)); color:white; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.25); transition:0.3s; margin:5px;}
+button:hover{transform:scale(1.05);}
+.admin-danger{background:linear-gradient(135deg,var(--green),#00c96d)!important; box-shadow:0 4px 12px rgba(0,200,120,0.5);}
+.section{display:none;}
+.active{display:block;}
+canvas{margin-top:20px;border-radius:14px;width:100%;height:auto;max-width:650px;background:white;border:10px solid transparent;background-image:linear-gradient(white,white),linear-gradient(45deg,var(--dark-blue),var(--sky-blue));background-origin:border-box;background-clip:content-box, border-box;box-shadow:0 12px 28px rgba(0,0,0,0.30);}
+.certificate-list{display:flex; flex-wrap:wrap; justify-content:center;}
+.certificate-item{text-align:center; margin:12px;}
+.certificate-item img{width:180px; border-radius:10px; border:3px solid var(--sky-blue); box-shadow:0 8px 20px rgba(0,0,0,0.3);}
+</style>
 
-        /* ===================== BACKGROUND ===================== */
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(145deg, var(--dark-blue), var(--blue-green), var(--sky-blue));
-            min-height: 100vh;
-            margin: 0;
-            padding: 10px;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* ===================== CARD CONTAINER ===================== */
-        .container {
-            width: 95%;
-            max-width: 750px;
-            padding: 20px;
-            margin-top: 15px;
-            border-radius: 15px;
-            background: rgba(255,255,255,0.12);
-            backdrop-filter: blur(14px);
-            box-shadow: 0 6px 28px rgba(0,0,0,0.35);
-            border: 1px solid rgba(255,255,255,0.25);
-            text-align: center;
-        }
-
-        h1, h2 {
-            text-shadow: 0 0 8px rgba(255,255,255,0.6);
-            font-weight: 700;
-        }
-
-        /* ===================== INPUT + TEXTAREA ===================== */
-        input, textarea {
-            width: 80%;
-            padding: 12px 16px;
-            border-radius: 12px;
-            border: 1px solid rgba(45, 55, 140, 0.35);
-            background: rgba(255,255,255,0.85); 
-            color: #1a1a1a;
-            margin: 8px;
-            font-size: 15px;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.12);
-        }
-
-        input::placeholder,
-        textarea::placeholder {
-            color: rgba(0,0,0,0.55);
-        }
-
-        input:focus,
-        textarea:focus {
-            background: rgba(255,255,255,0.95);
-            border: 1px solid var(--sky-blue);
-            box-shadow: 0 0 8px rgba(50,162,219,0.4);
-            outline: none;
-        }
-
-        /* ===================== BUTTON ===================== */
-        button {
-            padding: 10px 18px;
-            border-radius: 12px;
-            border: none;
-            background: linear-gradient(135deg, var(--blue-green), var(--sky-blue));
-            color: white;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-            transition: 0.3s;
-            margin: 5px;
-        }
-
-        button:hover {
-            transform: scale(1.05);
-        }
-
-        .admin-danger {
-            background: linear-gradient(135deg, var(--green), #00c96d) !important;
-            box-shadow: 0 4px 12px rgba(0,200,120,0.5);
-        }
-
-        .section { display: none; }
-        .active { display: block; }
-
-        /* ===================== CANVAS ===================== */
-        canvas {
-            margin-top: 20px;
-            border-radius: 14px;
-            width: 100%;
-            height: auto;
-            max-width: 650px;
-            background: white;
-            border: 10px solid transparent;
-
-            background-image:
-                linear-gradient(white, white),
-                linear-gradient(45deg, var(--dark-blue), var(--sky-blue));
-
-            background-origin: border-box;
-            background-clip: content-box, border-box;
-
-            box-shadow: 0 12px 28px rgba(0,0,0,0.30);
-        }
-
-        /* ===================== LIST SERTIFIKAT ===================== */
-        .certificate-list {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .certificate-item {
-            text-align: center;
-            margin: 12px;
-        }
-
-        .certificate-item img {
-            width: 180px;
-            border-radius: 10px;
-            border: 3px solid var(--sky-blue);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        }
-
-    </style>
 </head>
 <body>
 
-    <!-- LOGIN -->
-    <div id="loginSection" class="container active">
-        <h1>ACU CERTIFICATE</h1>
-        <p>Masuk sebagai Admin atau lanjutkan sebagai Pengguna.</p>
+<!-- LOGIN -->
+<div id="loginSection" class="container active">
+<h1>ACU CERTIFICATE</h1>
+<p>Masuk sebagai Admin atau lanjutkan sebagai Pengguna.</p>
+<input id="username" placeholder="Username Admin">
+<input id="password" type="password" placeholder="Password Admin">
+<button onclick="login()">Login Admin</button>
+<button onclick="guestLogin()">Lanjutkan sebagai Pengguna</button>
+</div>
 
-        <input id="username" placeholder="Username Admin">
-        <input id="password" type="password" placeholder="Password Admin">
+<!-- ADMIN MENU -->
+<div id="adminMenuSection" class="container section">
+<h2>Menu Admin</h2>
+<div>
+<button onclick="showSection('createSection')">Buat Sertifikat</button>
+<button onclick="showSection('bulkSection')">Bulk Create</button>
+<button onclick="showSection('editSection')">Edit Template</button>
+<button onclick="showSection('searchSection')">Cari Sertifikat</button>
+<button onclick="showSection('allSection')">Lihat Semua Sertifikat</button>
+<button onclick="deleteAllCertificates()" class="admin-danger">Hapus Semua Sertifikat</button>
+</div>
+</div>
 
-        <button onclick="login()">Login Admin</button>
-        <button onclick="guestLogin()">Lanjutkan sebagai Pengguna</button>
-    </div>
+<!-- USER MENU -->
+<div id="userMenuSection" class="container section">
+<h2>Menu Pengguna</h2>
+<button onclick="showSection('searchSection')">Cari Sertifikat</button>
+<button onclick="showSection('allSection')">Lihat Semua Sertifikat</button>
+</div>
 
-    <!-- ADMIN MENU -->
-    <div id="adminMenuSection" class="container section">
-        <h2>Menu Admin</h2>
-        <div>
-            <button onclick="showSection('createSection')">Buat Sertifikat</button>
-            <button onclick="showSection('bulkSection')">Bulk Create</button>
-            <button onclick="showSection('editSection')">Edit Template</button>
-            <button onclick="showSection('searchSection')">Cari Sertifikat</button>
-            <button onclick="showSection('allSection')">Lihat Semua Sertifikat</button>
-            <button onclick="deleteAllCertificates()" class="admin-danger">Hapus Semua Sertifikat</button>
-        </div>
-    </div>
+<!-- CREATE -->
+<div id="createSection" class="container section">
+<h2>Buat Sertifikat</h2>
+<input id="nameInput" placeholder="Masukkan nama peserta">
+<button onclick="generateRandomName()">Nama Acak</button>
+<button onclick="generateCertificate()">Buat Sertifikat</button>
+<button onclick="downloadCertificate()">Download</button>
+<canvas id="certificateCanvas" width="700" height="500"></canvas>
+</div>
 
-    <!-- USER MENU -->
-    <div id="userMenuSection" class="container section">
-        <h2>Menu Pengguna</h2>
-        <button onclick="showSection('searchSection')">Cari Sertifikat</button>
-        <button onclick="showSection('allSection')">Lihat Semua Sertifikat</button>
-    </div>
+<!-- BULK -->
+<div id="bulkSection" class="container section">
+<h2>Bulk Create Sertifikat</h2>
+<textarea id="bulkInput" placeholder="Satu nama per baris" style="height:200px;"></textarea>
+<button onclick="generateBulk()">Generate Semua</button>
+<div id="bulkResult" class="certificate-list"></div>
+</div>
 
-    <!-- CREATE -->
-    <div id="createSection" class="container section">
-        <h2>Buat Sertifikat</h2>
-        <input id="nameInput" placeholder="Masukkan nama peserta">
-        <button onclick="generateRandomName()">Nama Acak</button>
-        <button onclick="generateCertificate()">Buat Sertifikat</button>
-        <button onclick="downloadCertificate()">Download</button>
-        <canvas id="certificateCanvas" width="700" height="500"></canvas>
-    </div>
+<!-- EDIT TEMPLATE -->
+<div id="editSection" class="container section">
+<h2>Edit Template</h2>
+<input type="file" id="templateUpload" accept="image/*">
+<button onclick="changeTemplate()">Upload Template</button>
+<canvas id="editCanvas" width="700" height="500"></canvas>
+</div>
 
-    <!-- BULK -->
-    <div id="bulkSection" class="container section">
-        <h2>Bulk Create Sertifikat</h2>
-        <textarea id="bulkInput" placeholder="Satu nama per baris" style="height:200px;"></textarea>
-        <button onclick="generateBulk()">Generate Semua</button>
-        <div id="bulkResult" class="certificate-list"></div>
-    </div>
+<!-- SEARCH -->
+<div id="searchSection" class="container section">
+<h2>Cari Sertifikat</h2>
+<input id="searchInput" placeholder="Masukkan nama">
+<button onclick="searchCertificates()">Cari</button>
+<div id="certificateList" class="certificate-list"></div>
+</div>
 
-    <!-- EDIT TEMPLATE -->
-    <div id="editSection" class="container section">
-        <h2>Edit Template</h2>
-        <input type="file" id="templateUpload" accept="image/*">
-        <button onclick="changeTemplate()">Upload Template</button>
-        <canvas id="editCanvas" width="700" height="500"></canvas>
-    </div>
+<!-- ALL CERTIFICATES -->
+<div id="allSection" class="container section">
+<h2>Semua Sertifikat</h2>
+<div id="allList" class="certificate-list"></div>
+</div>
 
-    <!-- SEARCH -->
-    <div id="searchSection" class="container section">
-        <h2>Cari Sertifikat</h2>
-        <input id="searchInput" placeholder="Masukkan nama">
-        <button onclick="searchCertificates()">Cari</button>
-        <div id="certificateList" class="certificate-list"></div>
-    </div>
-
-    <!-- ALL CERTIFICATES -->
-    <div id="allSection" class="container section">
-        <h2>Semua Sertifikat</h2>
-        <div id="allList" class="certificate-list"></div>
-    </div>
-
-    <canvas id="bulkCanvas" width="700" height="500" style="position:absolute;left:-9999px;"></canvas>
-
+<canvas id="bulkCanvas" width="700" height="500" style="position:absolute;left:-9999px;"></canvas>
 
 <script>
-
 let isAdmin = false;
-let certificates = JSON.parse(localStorage.getItem("certificates")) || [];
+let certificates = [];
 let currentTemplate = null;
 
+/* ================== FIREBASE CONFIG ================== */
+const firebaseConfig = {
+    apiKey: "API_KEY",
+    authDomain: "PROJECT_ID.firebaseapp.com",
+    projectId: "PROJECT_ID",
+    storageBucket: "PROJECT_ID.appspot.com",
+    messagingSenderId: "SENDER_ID",
+    appId: "APP_ID"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-/* =============== LOGIN =============== */
-
+/* ================== LOGIN ================== */
 function login() {
-    if (username.value === "admin" && password.value === "admin") {
-        isAdmin = true;
+    if (username.value==="admin" && password.value==="admin") {
+        isAdmin=true;
         showSection("adminMenuSection");
     } else alert("Login salah!");
 }
+function guestLogin() { isAdmin=false; showSection("userMenuSection"); }
 
-function guestLogin() {
-    isAdmin = false;
-    showSection("userMenuSection");
-}
-
-
-/* =============== NAV =============== */
-
+/* ================== NAV ================== */
 function showSection(id) {
-    document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+    document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
     document.getElementById(id).classList.add("active");
-
-    if (id === "allSection") renderAllCertificates();
+    if(id==="allSection") renderAllCertificates();
 }
 
-
-/* =============== TEMPLATE LOAD =============== */
-
-const savedTemplate = localStorage.getItem("currentTemplate");
-if (savedTemplate) {
-    const img = new Image();
-    img.onload = () => (currentTemplate = img);
-    img.src = savedTemplate;
-}
-
-
-/* =============== DRAW CERTIFICATE (FIX WARNA TEKS) =============== */
-
-function drawCertificate(canv, ctx, name) {
-
-    ctx.clearRect(0, 0, canv.width, canv.height);
-
-    if (currentTemplate)
-        ctx.drawImage(currentTemplate, 0, 0, canv.width, canv.height);
-    else {
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, canv.width, canv.height);
+/* ================== TEMPLATE LOAD ================== */
+db.collection("settings").doc("template").get().then(doc=>{
+    if(doc.exists){
+        const img=new Image();
+        img.onload=()=>currentTemplate=img;
+        img.src=doc.data().dataURL;
     }
+});
 
-    // WARNA NAMA FIX (tidak akan hitam lagi)
-    ctx.globalCompositeOperation = "source-over";
-    ctx.font = "bold 48px Poppins";
-    ctx.fillStyle = "#000000";  // HITAM PEKAT
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-
-    ctx.fillText(name, canv.width / 2, canv.height / 2);
-}
-
-
-/* =============== SINGLE CERTIFICATE =============== */
-
+/* ================== DRAW CERTIFICATE ================== */
 const canvas = certificateCanvas;
 const ctx = canvas.getContext("2d");
+drawCertificate(canvas,ctx,"Nama Peserta");
 
-drawCertificate(canvas, ctx, "Nama Peserta");
+function drawCertificate(canv,ctx,name){
+    ctx.clearRect(0,0,canv.width,canv.height);
+    if(currentTemplate) ctx.drawImage(currentTemplate,0,0,canv.width,canv.height);
+    else { ctx.fillStyle="#ffffff"; ctx.fillRect(0,0,canv.width,canv.height);}
+    ctx.globalCompositeOperation="source-over";
+    ctx.font="bold 48px Poppins";
+    ctx.fillStyle="#000000";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.fillText(name,canv.width/2,canv.height/2);
+}
 
-function generateCertificate() {
-    let name = nameInput.value.trim();
-    if (!name) return alert("Nama kosong!");
-
-    drawCertificate(canvas, ctx, name);
+/* ================== CERTIFICATE FUNCTIONS ================== */
+function generateCertificate(){
+    let name=nameInput.value.trim();
+    if(!name) return alert("Nama kosong!");
+    drawCertificate(canvas,ctx,name);
     saveCertificate(name);
 }
 
-function saveCertificate(name) {
-    html2canvas(canvas).then(c => {
-        certificates.push({ name, dataURL: c.toDataURL() });
-        localStorage.setItem("certificates", JSON.stringify(certificates));
-        alert("Sertifikat disimpan!");
+function saveCertificate(name){
+    html2canvas(canvas).then(c=>{
+        const dataURL=c.toDataURL();
+        db.collection("certificates").add({name,dataURL})
+          .then(()=>{alert("Sertifikat tersimpan di cloud!"); fetchCertificates();})
+          .catch(err=>alert(err));
     });
 }
 
-function downloadCertificate() {
-    html2canvas(canvas).then(c => {
-        const a = document.createElement("a");
-        a.href = c.toDataURL();
-        a.download = "sertifikat.png";
+function downloadCertificate(){
+    html2canvas(canvas).then(c=>{
+        const a=document.createElement("a");
+        a.href=c.toDataURL();
+        a.download="sertifikat.png";
         a.click();
     });
 }
 
-function generateRandomName() {
-    const arr = ["Lukman","Rizky","Sari","Aulia","Dewi","Rafi","Samsul","Anisa"];
-    nameInput.value = arr[Math.floor(Math.random() * arr.length)];
+function generateRandomName(){
+    const arr=["Lukman","Rizky","Sari","Aulia","Dewi","Rafi","Samsul","Anisa"];
+    nameInput.value=arr[Math.floor(Math.random()*arr.length)];
 }
 
+/* ================== BULK ================== */
+async function generateBulk(){
+    const raw=bulkInput.value.trim();
+    if(!raw) return alert("Masukkan nama!");
+    const list=raw.split("\n").map(n=>n.trim()).filter(n=>n);
+    if(!list.length) return alert("Tidak ada nama valid!");
+    bulkResult.innerHTML="Proses...";
 
-/* =============== BULK =============== */
+    const bcan=bulkCanvas;
+    const bctx=bcan.getContext("2d");
+    let out=[];
 
-async function generateBulk() {
-
-    const raw = bulkInput.value.trim();
-    if (!raw) return alert("Masukkan nama!");
-
-    const list = raw.split("\n").map(n => n.trim()).filter(n => n);
-    if (!list.length) return alert("Tidak ada nama valid!");
-
-    bulkResult.innerHTML = "Proses...";
-
-    const bcan = bulkCanvas;
-    const bctx = bcan.getContext("2d");
-
-    let out = [];
-
-    for (let name of list) {
-        drawCertificate(bcan, bctx, name);
-        const url = bcan.toDataURL();
-
-        certificates.push({ name, dataURL: url });
-        out.push({ name, url });
+    for(let name of list){
+        drawCertificate(bcan,bctx,name);
+        const url=bcan.toDataURL();
+        await db.collection("certificates").add({name,dataURL:url});
+        out.push({name,url});
     }
 
-    localStorage.setItem("certificates", JSON.stringify(certificates));
-
-    bulkResult.innerHTML = out.map(i => `
+    bulkResult.innerHTML=out.map(i=>`
         <div class="certificate-item">
-            <img src="${i.url}">
-            <br>${i.name}
-            <br><button onclick="downloadSpecific('${i.url}','${i.name}')">Download</button>
-        </div>
-    `).join('');
+            <img src="${i.url}"><br>${i.name}<br>
+            <button onclick="downloadSpecific('${i.url}','${i.name}')">Download</button>
+        </div>`).join('');
+    fetchCertificates();
 }
 
-function downloadSpecific(url, name) {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `sertifikat_${name}.png`;
+function downloadSpecific(url,name){
+    const a=document.createElement("a");
+    a.href=url;
+    a.download=`sertifikat_${name}.png`;
     a.click();
 }
 
-
-/* =============== SEARCH =============== */
-
-function searchCertificates() {
-    let q = searchInput.value.toLowerCase();
-    let list = certificateList;
-    list.innerHTML = "";
-
-    let filtered = certificates.filter(c => c.name.toLowerCase().includes(q));
-
-    if (!filtered.length) {
-        list.innerHTML = "<p>Tidak ditemukan</p>";
-        return;
-    }
-
-    filtered.forEach(c => {
-        list.innerHTML += `
-            <div class="certificate-item">
-                <img src="${c.dataURL}">
-                <br>${c.name}
-                <br>
-                <button onclick="downloadSpecific('${c.dataURL}','${c.name}')">Download</button>
-                ${isAdmin ? `<button onclick="deleteCertificate('${c.name}')">Hapus</button>` : ""}
-            </div>
-        `;
+/* ================== FETCH CERTIFICATES ================== */
+function fetchCertificates(){
+    db.collection("certificates").get().then(snapshot=>{
+        certificates=snapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
+        renderAllCertificates();
     });
 }
 
-function deleteCertificate(name) {
-    if (!isAdmin) return;
-    if (!confirm("Yakin hapus?")) return;
-
-    certificates = certificates.filter(c => c.name !== name);
-    localStorage.setItem("certificates", JSON.stringify(certificates));
-
-    searchCertificates();
-}
-
-
-/* =============== LIHAT SEMUA =============== */
-
-function renderAllCertificates() {
-    allList.innerHTML = "";
-
-    if (!certificates.length) {
-        allList.innerHTML = "<p>Belum ada sertifikat</p>";
-        return;
-    }
-
-    certificates.forEach(c => {
-        allList.innerHTML += `
-            <div class="certificate-item">
-                <img src="${c.dataURL}">
-                <br>${c.name}
-                <br>
-                <button onclick="downloadSpecific('${c.dataURL}','${c.name}')">Download</button>
-                ${isAdmin ? `<button onclick="deleteCertificate('${c.name}')">Hapus</button>` : ""}
-            </div>
-        `;
+/* ================== SEARCH ================== */
+function searchCertificates(){
+    let q=searchInput.value.toLowerCase();
+    let list=certificateList; list.innerHTML="";
+    let filtered=certificates.filter(c=>c.name.toLowerCase().includes(q));
+    if(!filtered.length){ list.innerHTML="<p>Tidak ditemukan</p>"; return;}
+    filtered.forEach(c=>{
+        list.innerHTML+=`
+        <div class="certificate-item">
+            <img src="${c.dataURL}"><br>${c.name}<br>
+            <button onclick="downloadSpecific('${c.dataURL}','${c.name}')">Download</button>
+            ${isAdmin?`<button onclick="deleteCertificate('${c.id}')">Hapus</button>`:""}
+        </div>`;
     });
 }
 
-
-/* =============== DELETE ALL =============== */
-
-function deleteAllCertificates() {
-    if (!isAdmin) return alert("Hanya admin!");
-    if (!confirm("Hapus semua sertifikat?")) return;
-
-    certificates = [];
-    localStorage.setItem("certificates", JSON.stringify(certificates));
-
-    alert("Semua sertifikat dihapus!");
-    allList.innerHTML = "";
+/* ================== RENDER ALL ================== */
+function renderAllCertificates(){
+    allList.innerHTML="";
+    if(!certificates.length){ allList.innerHTML="<p>Belum ada sertifikat</p>"; return;}
+    certificates.forEach(c=>{
+        allList.innerHTML+=`
+        <div class="certificate-item">
+            <img src="${c.dataURL}"><br>${c.name}<br>
+            <button onclick="downloadSpecific('${c.dataURL}','${c.name}')">Download</button>
+            ${isAdmin?`<button onclick="deleteCertificate('${c.id}')">Hapus</button>`:""}
+        </div>`;
+    });
 }
 
+/* ================== DELETE ================== */
+function deleteCertificate(id){
+    if(!isAdmin) return; if(!confirm("Yakin hapus?")) return;
+    db.collection("certificates").doc(id).delete().then(()=>fetchCertificates());
+}
 
-/* =============== TEMPLATE UPLOAD =============== */
+function deleteAllCertificates(){
+    if(!isAdmin) return alert("Hanya admin!");
+    if(!confirm("Hapus semua sertifikat?")) return;
+    certificates.forEach(c=>{
+        db.collection("certificates").doc(c.id).delete();
+    });
+    certificates=[]; allList.innerHTML=""; alert("Semua sertifikat dihapus!");
+}
 
-function changeTemplate() {
-    const file = templateUpload.files[0];
-    if (!file) return alert("Pilih file!");
-
-    const reader = new FileReader();
-    reader.onload = e => {
-        const img = new Image();
-        img.onload = () => {
-            currentTemplate = img;
-            localStorage.setItem("currentTemplate", e.target.result);
-
-            const ctx2 = editCanvas.getContext("2d");
-            ctx2.drawImage(img, 0, 0, editCanvas.width, editCanvas.height);
-
-            drawCertificate(canvas, ctx, "Nama Peserta");
-            alert("Template berhasil diganti!");
+/* ================== TEMPLATE UPLOAD ================== */
+function changeTemplate(){
+    const file=templateUpload.files[0]; if(!file) return alert("Pilih file!");
+    const reader=new FileReader();
+    reader.onload=e=>{
+        const img=new Image();
+        img.onload=()=>{
+            currentTemplate=img;
+            db.collection("settings").doc("template").set({dataURL:e.target.result})
+              .then(()=>alert("Template tersimpan global!"))
+              .catch(err=>alert(err));
+            const ctx2=editCanvas.getContext("2d");
+            ctx2.drawImage(img,0,0,editCanvas.width,editCanvas.height);
+            drawCertificate(canvas,ctx,"Nama Peserta");
         };
-        img.src = e.target.result;
+        img.src=e.target.result;
     };
     reader.readAsDataURL(file);
 }
 
+/* ================== INIT ================== */
+fetchCertificates();
 </script>
-
 </body>
 </html>
