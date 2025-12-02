@@ -5,10 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>✨ Generator Sertifikat dengan Supabase ✨</title>
 
-<!-- html2canvas untuk screenshot canvas -->
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-
-<!-- Supabase JS Client -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 
 <style>
@@ -45,10 +42,7 @@ body {
     text-align: center;
 }
 
-h1,h2 {
-    text-shadow: 0 0 8px rgba(255,255,255,0.6);
-    font-weight:700;
-}
+h1,h2 { text-shadow: 0 0 8px rgba(255,255,255,0.6); font-weight:700; }
 
 input,textarea {
     width: 80%;
@@ -63,12 +57,7 @@ input,textarea {
 }
 
 input::placeholder, textarea::placeholder { color: rgba(0,0,0,0.55); }
-input:focus, textarea:focus {
-    background: rgba(255,255,255,0.95);
-    border: 1px solid var(--sky-blue);
-    box-shadow: 0 0 8px rgba(50,162,219,0.4);
-    outline:none;
-}
+input:focus, textarea:focus { background: rgba(255,255,255,0.95); border: 1px solid var(--sky-blue); box-shadow: 0 0 8px rgba(50,162,219,0.4); outline:none; }
 
 button {
     padding: 10px 18px;
@@ -182,227 +171,187 @@ canvas {
 <canvas id="bulkCanvas" width="700" height="500" style="position:absolute;left:-9999px;"></canvas>
 
 <script>
-  // Supabase client setup
+  // Supabase setup
   const SUPABASE_URL = "https://ipswipmfqlnufvjjztxg.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlwc3dpcG1mcWxudWZ2amp6dHhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2NDY4MTEsImV4cCI6MjA4MDIyMjgxMX0.HKXuzBBHFcuiEd40UFAugDY8cr2inFWRwKmKbYM6iY4";
-
   const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  /* ================== GLOBAL VARIABLES ================== */
   let isAdmin = false;
   let certificates = [];
   let currentTemplate = null;
 
-  /* ================== LOGIN ================== */
+  // Login
   function login() {
-    if (username.value === "admin" && password.value === "admin") {
+    const user = document.getElementById("username").value.trim();
+    const pass = document.getElementById("password").value.trim();
+    if (user === "admin" && pass === "admin") {
       isAdmin = true;
-      showSection("adminMenuSection");
+      showSection('adminMenuSection');
     } else alert("Login salah!");
   }
-  function guestLogin() {
-    isAdmin = false;
-    showSection("userMenuSection");
-  }
+  function guestLogin() { isAdmin = false; showSection('userMenuSection'); }
 
-  /* ================== NAV ================== */
+  // Navigation
   function showSection(id) {
     document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
     document.getElementById(id).classList.add("active");
-    if (id === "allSection") renderAllCertificates();
-    if (id === "searchSection") searchCertificates();
+    if(id==="allSection") renderAllCertificates();
+    if(id==="searchSection") searchCertificates();
   }
 
-  /* ================== TEMPLATE LOAD ================== */
+  // Load template
   const savedTemplate = localStorage.getItem("currentTemplate");
-  if (savedTemplate) {
+  if(savedTemplate) {
     const img = new Image();
-    img.onload = () => (currentTemplate = img);
+    img.onload = ()=> currentTemplate = img;
     img.src = savedTemplate;
   }
 
-  /* ================== DRAW CERTIFICATE ================== */
-  function drawCertificate(canv, ctx, name) {
-    ctx.clearRect(0, 0, canv.width, canv.height);
-    if (currentTemplate) ctx.drawImage(currentTemplate, 0, 0, canv.width, canv.height);
-    else {
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, canv.width, canv.height);
-    }
-    ctx.globalCompositeOperation = "source-over";
-    ctx.font = "bold 48px Poppins";
-    ctx.fillStyle = "#000000";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(name, canv.width / 2, canv.height / 2);
-  }
-
-  const canvas = certificateCanvas;
+  // Canvas draw
+  const canvas = document.getElementById("certificateCanvas");
   const ctx = canvas.getContext("2d");
+  function drawCertificate(canv, ctx, name){
+    ctx.clearRect(0,0,canv.width,canv.height);
+    if(currentTemplate) ctx.drawImage(currentTemplate,0,0,canv.width,canv.height);
+    else { ctx.fillStyle="#ffffff"; ctx.fillRect(0,0,canv.width,canv.height);}
+    ctx.font = "bold 48px Poppins";
+    ctx.fillStyle = "#000";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.fillText(name, canv.width/2, canv.height/2);
+  }
   drawCertificate(canvas, ctx, "Nama Peserta");
 
-  /* ================== SUPABASE SYNC ================== */
-  async function fetchCertificates() {
-    let { data, error } = await supabase.from("certificates").select("*").order('created_at', { ascending: false });
-    if (error) {
-      alert("Error mengambil data: " + error.message);
-      return;
-    }
+  // Fetch
+  async function fetchCertificates(){
+    const { data, error } = await supabase.from("certificates").select("*").order('created_at',{ascending:false});
+    if(error){ alert("Error fetch: "+error.message); return; }
     certificates = data || [];
   }
   fetchCertificates();
 
-  /* ================== SINGLE CERTIFICATE ================== */
-  async function generateCertificate() {
-    let name = nameInput.value.trim();
-    if (!name) return alert("Nama kosong!");
+  // Generate single
+  async function generateCertificate(){
+    const name = document.getElementById("nameInput").value.trim();
+    if(!name) return alert("Nama kosong!");
     drawCertificate(canvas, ctx, name);
-
-    // Simpan ke supabase
-    const dataURL = canvas.toDataURL();
-    const { error } = await supabase.from("certificates").insert([{ name, dataurl: dataURL }]);
-    if (error) {
-      alert("Gagal menyimpan: " + error.message);
-      return;
-    }
+    const dataurl = canvas.toDataURL();
+    const { error } = await supabase.from("certificates").insert([{name,dataurl}]);
+    if(error){ alert("Gagal simpan: "+error.message); return; }
     alert("Sertifikat disimpan!");
     await fetchCertificates();
   }
 
-  /* ================== DOWNLOAD ================== */
-  function downloadCertificate() {
-    html2canvas(canvas).then(c => {
-      const a = document.createElement("a");
-      a.href = c.toDataURL();
-      a.download = "sertifikat.png";
+  // Download
+  function downloadCertificate(){
+    html2canvas(canvas).then(c=>{
+      const a=document.createElement("a");
+      a.href=c.toDataURL();
+      a.download="sertifikat.png";
       a.click();
     });
   }
-  function downloadSpecific(url, name) {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `sertifikat_${name}.png`;
+  function downloadSpecific(url,name){
+    const a=document.createElement("a");
+    a.href=url;
+    a.download=`sertifikat_${name}.png`;
     a.click();
   }
 
-  /* ================== RANDOM NAME ================== */
-  function generateRandomName() {
-    const arr = ["Lukman", "Rizky", "Sari", "Aulia", "Dewi", "Rafi", "Samsul", "Anisa"];
-    nameInput.value = arr[Math.floor(Math.random() * arr.length)];
+  // Random name
+  function generateRandomName(){
+    const arr=["Lukman","Rizky","Sari","Aulia","Dewi","Rafi","Samsul","Anisa"];
+    document.getElementById("nameInput").value=arr[Math.floor(Math.random()*arr.length)];
   }
 
-  /* ================== BULK ================== */
-  async function generateBulk() {
-    const raw = bulkInput.value.trim();
-    if (!raw) return alert("Masukkan nama!");
-    const list = raw.split("\n").map(n => n.trim()).filter(n => n);
-    if (!list.length) return alert("Tidak ada nama valid!");
-
-    bulkResult.innerHTML = "Proses...";
-    const bcan = bulkCanvas;
-    const bctx = bcan.getContext("2d");
-
-    for (const name of list) {
-      drawCertificate(bcan, bctx, name);
-      const url = bcan.toDataURL();
-      const { error } = await supabase.from("certificates").insert([{ name, dataurl: url }]);
-      if (error) {
-        alert("Gagal simpan: " + error.message);
-        bulkResult.innerHTML = "";
-        return;
-      }
+  // Bulk
+  async function generateBulk(){
+    const raw=document.getElementById("bulkInput").value.trim();
+    if(!raw) return alert("Masukkan nama!");
+    const list=raw.split("\n").map(n=>n.trim()).filter(n=>n);
+    if(!list.length) return alert("Tidak ada nama valid!");
+    const bulkResult=document.getElementById("bulkResult");
+    bulkResult.innerHTML="Proses...";
+    const bcan=document.getElementById("bulkCanvas");
+    const bctx=bcan.getContext("2d");
+    for(const name of list){
+      drawCertificate(bcan,bctx,name);
+      const url=bcan.toDataURL();
+      const { error } = await supabase.from("certificates").insert([{name,dataurl:url}]);
+      if(error){ alert("Gagal simpan: "+error.message); bulkResult.innerHTML=""; return; }
     }
     await fetchCertificates();
-    bulkResult.innerHTML = "Selesai!";
+    bulkResult.innerHTML="Selesai!";
   }
 
-  /* ================== SEARCH ================== */
-  function searchCertificates() {
-    let q = searchInput.value.toLowerCase();
-    certificateList.innerHTML = "";
-
-    let filtered = certificates.filter(c => c.name.toLowerCase().includes(q));
-    if (!filtered.length) {
-      certificateList.innerHTML = "<p>Tidak ditemukan</p>";
-      return;
-    }
-
-    filtered.forEach(c => {
-      certificateList.innerHTML += `
+  // Search
+  function searchCertificates(){
+    const q=document.getElementById("searchInput").value.toLowerCase();
+    const list=document.getElementById("certificateList");
+    list.innerHTML="";
+    const filtered=certificates.filter(c=>c.name.toLowerCase().includes(q));
+    if(!filtered.length){ list.innerHTML="<p>Tidak ditemukan</p>"; return; }
+    filtered.forEach(c=>{
+      list.innerHTML+=`
       <div class="certificate-item">
-        <img src="${c.dataurl}">
-        <br>${c.name}
-        <br>
-        <button onclick="downloadSpecific('${c.dataurl}', '${c.name}')">Download</button>
-        ${isAdmin ? `<button onclick="deleteCertificate(${c.id})">Hapus</button>` : ""}
+        <img src="${c.dataurl}"><br>${c.name}<br>
+        <button onclick="downloadSpecific('${c.dataurl}','${c.name}')">Download</button>
+        ${isAdmin?`<button onclick="deleteCertificate(${c.id})">Hapus</button>`:""}
       </div>`;
     });
   }
 
-  /* ================== RENDER ALL ================== */
-  function renderAllCertificates() {
-    allList.innerHTML = "";
-    if (!certificates.length) {
-      allList.innerHTML = "<p>Belum ada sertifikat</p>";
-      return;
-    }
-    certificates.forEach(c => {
-      allList.innerHTML += `
+  // Render all
+  function renderAllCertificates(){
+    const allList=document.getElementById("allList");
+    allList.innerHTML="";
+    if(!certificates.length){ allList.innerHTML="<p>Belum ada sertifikat</p>"; return; }
+    certificates.forEach(c=>{
+      allList.innerHTML+=`
       <div class="certificate-item">
-        <img src="${c.dataurl}">
-        <br>${c.name}
-        <br>
-        <button onclick="downloadSpecific('${c.dataurl}', '${c.name}')">Download</button>
-        ${isAdmin ? `<button onclick="deleteCertificate(${c.id})">Hapus</button>` : ""}
+        <img src="${c.dataurl}"><br>${c.name}<br>
+        <button onclick="downloadSpecific('${c.dataurl}','${c.name}')">Download</button>
+        ${isAdmin?`<button onclick="deleteCertificate(${c.id})">Hapus</button>`:""}
       </div>`;
     });
   }
 
-  /* ================== DELETE ================== */
-  async function deleteCertificate(id) {
-    if (!isAdmin) return;
-    if (!confirm("Yakin hapus?")) return;
-
-    const { error } = await supabase.from("certificates").delete().eq("id", id);
-    if (error) {
-      alert("Gagal hapus: " + error.message);
-      return;
-    }
+  // Delete
+  async function deleteCertificate(id){
+    if(!isAdmin) return;
+    if(!confirm("Yakin hapus?")) return;
+    const { error } = await supabase.from("certificates").delete().eq("id",id);
+    if(error){ alert("Gagal hapus: "+error.message); return; }
     await fetchCertificates();
     searchCertificates();
     renderAllCertificates();
   }
-
-  async function deleteAllCertificates() {
-    if (!isAdmin) return alert("Hanya admin!");
-    if (!confirm("Hapus semua sertifikat?")) return;
-
-    // Supabase tidak punya batch delete, jadi delete satu-satu
-    for (const c of certificates) {
-      await supabase.from("certificates").delete().eq("id", c.id);
-    }
+  async function deleteAllCertificates(){
+    if(!isAdmin) return alert("Hanya admin!");
+    if(!confirm("Hapus semua sertifikat?")) return;
+    for(const c of certificates){ await supabase.from("certificates").delete().eq("id",c.id); }
     await fetchCertificates();
     alert("Semua sertifikat dihapus!");
     renderAllCertificates();
   }
 
-  /* ================== TEMPLATE UPLOAD ================== */
-  function changeTemplate() {
-    const file = templateUpload.files[0];
-    if (!file) return alert("Pilih file!");
-    const reader = new FileReader();
-    reader.onload = e => {
-      const img = new Image();
-      img.onload = () => {
-        currentTemplate = img;
-        localStorage.setItem("currentTemplate", e.target.result);
-        const ctx2 = editCanvas.getContext("2d");
-        ctx2.clearRect(0, 0, editCanvas.width, editCanvas.height);
-        ctx2.drawImage(img, 0, 0, editCanvas.width, editCanvas.height);
-        drawCertificate(canvas, ctx, "Nama Peserta");
+  // Template
+  function changeTemplate(){
+    const file=document.getElementById("templateUpload").files[0];
+    if(!file) return alert("Pilih file!");
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        currentTemplate=img;
+        localStorage.setItem("currentTemplate",e.target.result);
+        const ctx2=document.getElementById("editCanvas").getContext("2d");
+        ctx2.clearRect(0,0,700,500);
+        ctx2.drawImage(img,0,0,700,500);
+        drawCertificate(canvas,ctx,"Nama Peserta");
         alert("Template berhasil diganti!");
       };
-      img.src = e.target.result;
+      img.src=e.target.result;
     };
     reader.readAsDataURL(file);
   }
