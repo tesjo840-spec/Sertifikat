@@ -469,15 +469,23 @@ async function uploadTemplate() {
     reader.onload = async e => {
         const base64Data = e.target.result;
 
-        // Kirim template base64 ke Apps Script
-        await fetch(API,{
+        // PASTIKAN HEADER INI ADA!
+        const res = await fetch(API,{ 
             method:"POST",
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json' }, // <-- KRITIS!
             body:JSON.stringify({template: base64Data})
         });
-
-        loadTemplateFromBase64(base64Data);
-        alert("Template berhasil disimpan!");
+        
+        // Cek hasil respons dari Apps Script
+        const result = await res.json();
+        
+        if (result.status === 'success') {
+            loadTemplateFromBase64(base64Data);
+            alert("Template berhasil disimpan!");
+        } else {
+            // Menampilkan error jika Apps Script gagal
+            alert("Template gagal disimpan! Server error: " + result.message);
+        }
     };
     reader.readAsDataURL(file);
 }
