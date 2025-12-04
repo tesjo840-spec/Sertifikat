@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ACU CERTIFICATE (Online)</title>
+<title>ACU CERTIFICATE (PHP Storage)</title>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
 <style>
-/* CSS dari kode sebelumnya tetap sama */
+/* --- CSS TETAP SAMA DARI KODE ANDA --- */
 :root {
     --dark-blue: #2D378C;
     --blue-green: #137389;
@@ -50,14 +51,11 @@ input, textarea {
     padding: 12px 16px;
     border-radius: 12px;
     border: 1px solid rgba(45, 55, 140, 0.35);
-    background: rgba(255,255,255,0.85); 
+    background: rgba(255,255,255,0.85);
     color: #1a1a1a;
     margin: 8px;
     font-size: 15px;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.12);
 }
-
-textarea { height: 160px; }
 
 button {
     padding: 10px 18px;
@@ -66,17 +64,11 @@ button {
     background: linear-gradient(135deg, var(--blue-green), var(--sky-blue));
     color: white;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-    transition: 0.3s;
     margin: 5px;
+    transition: 0.2s;
 }
 
 button:hover { transform: scale(1.05); }
-
-.admin-danger {
-    background: linear-gradient(135deg, var(--green), #00c96d) !important;
-    box-shadow: 0 4px 12px rgba(0,200,120,0.5);
-}
 
 .section { display: none; }
 .active { display: block; }
@@ -86,15 +78,7 @@ canvas {
     border-radius: 14px;
     width: 100%;
     max-width: 650px;
-    height: auto;
     background: white;
-    border: 10px solid transparent;
-    background-image:
-        linear-gradient(white, white),
-        linear-gradient(45deg, var(--dark-blue), var(--sky-blue));
-    background-origin: border-box;
-    background-clip: content-box, border-box;
-    box-shadow: 0 12px 28px rgba(0,0,0,0.30);
 }
 
 .certificate-list {
@@ -102,74 +86,79 @@ canvas {
     flex-wrap: wrap;
     justify-content: center;
 }
-
 .certificate-item {
     background: rgba(255,255,255,0.15);
     padding: 10px;
     border-radius: 10px;
     margin: 12px;
     text-align: center;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }
-
 .certificate-item img {
     width: 180px;
     border-radius: 10px;
 }
 </style>
 </head>
+
 <body>
 
+<!-- ================== LOGIN ================== -->
 <div id="loginSection" class="container active">
     <h1>ACU CERTIFICATE</h1>
-    <p>Masuk sebagai Admin atau lanjutkan sebagai Pengguna.</p>
+    <p>Masuk sebagai Admin (admin/admin) atau Pengguna.</p>
 
     <input id="username" placeholder="Username Admin">
     <input id="password" type="password" placeholder="Password Admin">
 
     <button onclick="login()">Login Admin</button>
-    <button onclick="guestLogin()">Lanjutkan sebagai Pengguna</button>
+    <button onclick="guestLogin()">Lanjut sebagai Pengguna</button>
 </div>
 
+<!-- ================== ADMIN MENU ================== -->
 <div id="adminMenuSection" class="container section">
     <h2>Menu Admin</h2>
     <button onclick="showSection('createSection')">Buat Sertifikat</button>
     <button onclick="showSection('bulkSection')">Bulk Create</button>
     <button onclick="showSection('editSection')">Edit Template</button>
     <button onclick="showSection('searchSection')">Cari Sertifikat</button>
-    <button onclick="showSection('allSection')">Lihat Semua Sertifikat</button>
-    <button onclick="deleteAllCertificates()" class="admin-danger">Hapus Semua Sertifikat</button>
+    <button onclick="showSection('allSection')">Semua Sertifikat</button>
+    <button onclick="deleteAllCertificates()" style="background:#c0392b">Hapus Semua</button>
 </div>
 
+<!-- ================== USER MENU ================== -->
 <div id="userMenuSection" class="container section">
     <h2>Menu Pengguna</h2>
     <button onclick="showSection('searchSection')">Cari Sertifikat</button>
-    <button onclick="showSection('allSection')">Lihat Semua Sertifikat</button>
+    <button onclick="showSection('allSection')">Semua Sertifikat</button>
 </div>
 
+<!-- ================== CREATE ================== -->
 <div id="createSection" class="container section">
     <h2>Buat Sertifikat</h2>
-    <input id="nameInput" placeholder="Masukkan nama peserta">
+    <input id="nameInput" placeholder="Nama peserta">
     <button onclick="generateRandomName()">Nama Acak</button>
-    <button onclick="generateCertificate()">Buat Sertifikat</button>
+    <button onclick="generateCertificate()">Buat & Simpan</button>
     <button onclick="downloadCertificate()">Download</button>
     <canvas id="certificateCanvas" width="700" height="500"></canvas>
 </div>
 
+<!-- ================== BULK ================== -->
 <div id="bulkSection" class="container section">
-    <h2>Bulk Create Sertifikat</h2>
+    <h2>Bulk Create</h2>
     <textarea id="bulkInput" placeholder="Satu nama per baris"></textarea>
-    <button onclick="generateBulk()">Generate Semua</button>
+    <button onclick="generateBulk()">Generate & Simpan Semua</button>
     <div id="bulkResult" class="certificate-list"></div>
 </div>
 
+<!-- ================== EDIT TEMPLATE ================== -->
 <div id="editSection" class="container section">
     <h2>Edit Template</h2>
     <input type="file" id="templateUpload" accept="image/*">
-    <button onclick="uploadTemplate()">Upload Template</button>
+    <button onclick="uploadTemplate()">Upload</button>
     <canvas id="editCanvas" width="700" height="500"></canvas>
 </div>
 
+<!-- ================== SEARCH ================== -->
 <div id="searchSection" class="container section">
     <h2>Cari Sertifikat</h2>
     <input id="searchInput" placeholder="Masukkan nama">
@@ -177,60 +166,72 @@ canvas {
     <div id="certificateList" class="certificate-list"></div>
 </div>
 
+<!-- ================== ALL ================== -->
 <div id="allSection" class="container section">
     <h2>Semua Sertifikat</h2>
     <div id="allList" class="certificate-list"></div>
 </div>
 
-<canvas id="bulkCanvas" width="700" height="500" style="display:none;"></canvas>
+<canvas id="bulkCanvas" width="700" height="500" style="display:none"></canvas>
 
 <script>
-/* ============================================================
-    CONFIG
-============================================================ */
-// URL API Google Apps Script yang baru Anda berikan
-const API = "https://script.google.com/macros/s/AKfycbxOuPulavFqyvZBVC0uw1T2h3NoWNZNg3VTCEGDAoTech8-CKUlaAOVIVt_Imh9oPOhqw/exec";
+// =========================================================
+//  GLOBAL VARIABLES
+// =========================================================
 let isAdmin = false;
 let certificates = [];
 let currentTemplate = null;
+let templateBase64 = null;
 
-/* ============================================================
-    LOGIN
-============================================================ */
-async function login() {
-    const user = username.value;
-    const pass = password.value;
+const canvas = document.getElementById("certificateCanvas");
+const ctx = canvas.getContext("2d");
 
-    try {
-        const res = await fetch(API, {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: "login", username: user, password: pass })
-        });
+// =========================================================
+//  SERVER API (PHP)
+// =========================================================
+async function loadDataFromServer() {
+    let res = await fetch("api/load.php");
+    let data = await res.json();
 
-        const data = await res.json();
+    certificates = data.certificates || [];
 
-        if (data.status === "success" && data.isAdmin) {
-            isAdmin = true;
-            showSection("adminMenuSection");
-            loadCertificates();
-        } else {
-            alert("Login gagal! Cek username/password di Apps Script.");
-        }
-    } catch (e) {
-        alert("Gagal terhubung ke server API.");
+    if (data.template) {
+        templateBase64 = data.template;
+        loadTemplateFromBase64(templateBase64);
     }
+}
+
+async function saveDataToServer() {
+    await fetch("api/save.php", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            template: templateBase64,
+            certificates: certificates
+        })
+    });
+}
+
+// =========================================================
+//  LOGIN
+// =========================================================
+function login() {
+    if (username.value === "admin" && password.value === "admin") {
+        isAdmin = true;
+        showSection("adminMenuSection");
+        loadDataFromServer();
+    } else alert("Login salah!");
 }
 
 function guestLogin() {
     isAdmin = false;
     showSection("userMenuSection");
-    loadCertificates();
+    loadDataFromServer();
 }
 
-/* ============================================================
-    GENERAL UI
-============================================================ */
+// =========================================================
+//  UI
+// =========================================================
 function showSection(id) {
     document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
     document.getElementById(id).classList.add("active");
@@ -238,261 +239,190 @@ function showSection(id) {
     if (id === "allSection") renderAllCertificates();
 }
 
-/* ============================================================
-    LOAD DATA FROM GOOGLE SHEETS
-============================================================ */
-async function loadCertificates() {
-    try {
-        const res = await fetch(API);
-        const data = await res.json();
-        certificates = data.certificates || [];
-        if(data.template) loadTemplateFromBase64(data.template);
-        else currentTemplate = null;
-    } catch(err) {
-        console.error("Gagal load certificates", err);
-        // Biarkan certificates kosong jika gagal load
-        certificates = []; 
-    }
-}
-
+// =========================================================
+//  DRAW CERTIFICATE
+// =========================================================
 function loadTemplateFromBase64(base64) {
     const img = new Image();
-    img.onload = () => { 
-        currentTemplate = img; 
-        // Perbarui pratinjau di canvas utama dan edit
-        drawCertificate(canvas, ctx, "Nama Peserta"); 
-        
-        // Cek jika editCanvas ada, lalu gambar
-        const editCanv = document.getElementById('editCanvas');
-        if (editCanv) {
-            const editCtx = editCanv.getContext("2d");
-            drawCertificate(editCanv, editCtx, "PREVIEW TEMPLATE");
-        }
+    img.onload = () => {
+        currentTemplate = img;
+        drawCertificate(canvas, ctx, "Nama Peserta");
+
+        let ec = document.getElementById("editCanvas");
+        let ectx = ec.getContext("2d");
+        drawCertificate(ec, ectx, "PREVIEW");
     };
     img.src = base64;
 }
 
-/* ============================================================
-    DRAW CERTIFICATE
-============================================================ */
-const canvas = certificateCanvas;
-const ctx = canvas.getContext("2d");
-
 function drawCertificate(canv, ctx, name) {
     ctx.clearRect(0,0,canv.width,canv.height);
-    
-    if(currentTemplate) {
-        ctx.drawImage(currentTemplate,0,0,canv.width,canv.height);
-    } else { 
-        // Default background
-        ctx.fillStyle="#fff"; 
+
+    if (currentTemplate) {
+        ctx.drawImage(currentTemplate, 0, 0, canv.width, canv.height);
+    } else {
+        ctx.fillStyle = "#fff";
         ctx.fillRect(0,0,canv.width,canv.height);
-        ctx.fillStyle="#000";
-        ctx.textAlign="center";
-        ctx.fillText("Template Kosong", canv.width/2, 100);
     }
-    
-    // Draw Name
-    ctx.font="bold 48px Poppins";
-    ctx.fillStyle="#000";
-    ctx.textAlign="center";
+
+    ctx.font = "bold 48px Poppins";
+    ctx.fillStyle = "black";
+    ctx.textAlign = "center";
     ctx.fillText(name, canv.width/2, canv.height/2);
 }
 
-drawCertificate(canvas, ctx, "Nama Peserta");
-
-/* ============================================================
-    CREATE CERTIFICATE
-============================================================ */
+// =========================================================
+//  CREATE CERTIFICATE
+// =========================================================
 async function generateCertificate() {
     let name = nameInput.value.trim();
-    if(!name) return alert("Nama kosong!");
+    if (!name) return alert("Nama kosong!");
+
     drawCertificate(canvas, ctx, name);
-    const dataURL = canvas.toDataURL();
+    let url = canvas.toDataURL();
 
-    await fetch(API,{
-        method:"POST",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({name, url: dataURL})
-    });
+    certificates.push({ name, url });
+    await saveDataToServer();
 
-    alert("Sertifikat disimpan!");
-    loadCertificates();
+    alert("Sertifikat disimpan di server!");
 }
 
 function downloadCertificate() {
-    // Menggunakan canvas langsung untuk download
-    const a=document.createElement("a");
-    a.href=canvas.toDataURL();
-    a.download="sertifikat_" + nameInput.value.trim().replace(/\s/g, '_') + ".png";
+    let a = document.createElement("a");
+    a.href = canvas.toDataURL();
+    a.download = "sertifikat.png";
     a.click();
 }
 
 function generateRandomName() {
-    const arr=["Lukman","Rizky","Sari","Aulia","Dewi","Rafi","Samsul","Anisa"];
+    let arr = ["Lukman","Sari","Dewi","Rafi","Anisa"];
     nameInput.value = arr[Math.floor(Math.random()*arr.length)];
 }
 
-/* ============================================================
-    BULK CREATE
-============================================================ */
+// =========================================================
+//  BULK
+// =========================================================
 async function generateBulk() {
-    const raw = bulkInput.value.trim();
-    if(!raw) return alert("Masukkan nama!");
-    const list = raw.split("\n").map(n=>n.trim()).filter(n=>n);
-    if(!list.length) return;
+    let list = bulkInput.value.trim().split("\n").map(n => n.trim()).filter(n => n);
+    if (!list.length) return;
 
-    bulkResult.innerHTML = "Proses...";
-    const bcan = bulkCanvas;
-    const bctx = bcan.getContext("2d");
-    let html="";
+    let bcan = bulkCanvas;
+    let bctx = bcan.getContext("2d");
+    bulkResult.innerHTML = "";
 
-    for(let name of list){
-        drawCertificate(bcan,bctx,name);
-        const url = bcan.toDataURL();
+    for (let name of list) {
+        drawCertificate(bcan, bctx, name);
+        let url = bcan.toDataURL();
 
-        // Kirim setiap sertifikat ke Apps Script
-        await fetch(API,{
-            method:"POST",
-            headers: { 'Content-Type': 'application/json' },
-            body:JSON.stringify({name,url})
-        });
-        
-        html += `<div class="certificate-item">
-                     <img src="${url}">
-                     <br>${name}
-                     <br><button onclick="downloadSpecific('${url}','${name}')">Download</button>
-                 </div>`;
+        certificates.push({ name, url });
+
+        bulkResult.innerHTML += `
+            <div class="certificate-item">
+                <img src="${url}">
+                <br>${name}
+                <br><button onclick="downloadSpecific('${url}','${name}')">Download</button>
+            </div>`;
     }
-    bulkResult.innerHTML = html;
-    loadCertificates();
+
+    await saveDataToServer();
 }
 
-/* ============================================================
-    DOWNLOAD SPECIFIC
-============================================================ */
-function downloadSpecific(url,name){
-    const a=document.createElement("a");
-    a.href=url;
-    a.download=`sertifikat_${name}.png`;
+function downloadSpecific(url, name) {
+    let a = document.createElement("a");
+    a.href = url;
+    a.download = `sertifikat_${name}.png`;
     a.click();
 }
 
-/* ============================================================
-    SEARCH
-============================================================ */
-async function searchCertificates() {
-    await loadCertificates(); // Selalu muat data terbaru
-    let q = searchInput.value.toLowerCase();
-    let list = certificateList;
+// =========================================================
+//  SEARCH
+// =========================================================
+function searchCertificates() {
+    let q = searchInput.value.trim().toLowerCase();
+    let list = document.getElementById("certificateList");
     list.innerHTML = "";
 
-    let filtered = certificates.filter(c=>c.name.toLowerCase().includes(q));
-    if(!filtered.length) { list.innerHTML="<p>Tidak ditemukan</p>"; return; }
+    let filtered = certificates.filter(c => c.name.toLowerCase().includes(q));
 
-    filtered.forEach(c=>{
-        list.innerHTML += `<div class="certificate-item">
-            <img src="${c.url}">
-            <br>${c.name}
-            <br>
-            <button onclick="downloadSpecific('${c.url}','${c.name}')">Download</button>
-            ${isAdmin?`<button onclick="deleteCertificate('${c.name}')">Hapus</button>`:""}
-        </div>`;
+    if (!filtered.length) {
+        list.innerHTML = "<p>Tidak ditemukan</p>";
+        return;
+    }
+
+    filtered.forEach(c => {
+        list.innerHTML += `
+            <div class="certificate-item">
+                <img src="${c.url}">
+                <br>${c.name}
+                <br><button onclick="downloadSpecific('${c.url}','${c.name}')">Download</button>
+                ${isAdmin ? `<button onclick="deleteCertificate('${c.name}')">Hapus</button>` : ""}
+            </div>`;
     });
 }
 
-/* ============================================================
-    DELETE ONE
-============================================================ */
+// =========================================================
+//  DELETE CERTIFICATE
+// =========================================================
 async function deleteCertificate(name) {
-    if(!isAdmin) return alert("Hanya admin!");
-    if(!confirm(`Hapus sertifikat untuk ${name}?`)) return;
+    if (!isAdmin) return;
 
-    // Kirim permintaan delete ke Apps Script
-    await fetch(API,{
-        method:"POST", 
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({name, method: "DELETE"}) // Menggunakan POST dengan penanda DELETE
-    });
-    
-    alert("Dihapus.");
-    loadCertificates();
+    certificates = certificates.filter(c => c.name !== name);
+    await saveDataToServer();
+
+    alert("Dihapus!");
     searchCertificates();
     renderAllCertificates();
 }
 
-/* ============================================================
-    DELETE ALL
-============================================================ */
+// =========================================================
+//  DELETE ALL
+// =========================================================
 async function deleteAllCertificates() {
-    if(!isAdmin) return alert("Hanya admin!");
-    if(!confirm("Hapus semua sertifikat? Tindakan ini tidak dapat dibatalkan!")) return;
-    
-    // Kirim permintaan delete all ke Apps Script
-    await fetch(API,{
-        method:"POST",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({deleteAll:true, method: "DELETE"})
-    });
+    if (!confirm("Yakin hapus semua?")) return;
 
-    alert("Semua sertifikat dihapus!");
-    certificates=[];
+    certificates = [];
+    await saveDataToServer();
+
     renderAllCertificates();
 }
 
-/* ============================================================
-    RENDER ALL CERTIFICATES
-============================================================ */
-async function renderAllCertificates() {
-    await loadCertificates();
-    allList.innerHTML="";
-    if(!certificates.length){ allList.innerHTML="<p>Belum ada sertifikat</p>"; return; }
+// =========================================================
+//  ALL
+// =========================================================
+function renderAllCertificates() {
+    let list = document.getElementById("allList");
+    list.innerHTML = "";
 
-    certificates.forEach(c=>{
-        allList.innerHTML += `<div class="certificate-item">
-            <img src="${c.url}">
-            <br>${c.name}
-            <br><button onclick="downloadSpecific('${c.url}','${c.name}')">Download</button>
-            ${isAdmin?`<button onclick="deleteCertificate('${c.name}')">Hapus</button>`:""}
-        </div>`;
+    certificates.forEach(c => {
+        list.innerHTML += `
+            <div class="certificate-item">
+                <img src="${c.url}">
+                <br>${c.name}
+                <br><button onclick="downloadSpecific('${c.url}','${c.name}')">Download</button>
+                ${isAdmin ? `<button onclick="deleteCertificate('${c.name}')">Hapus</button>` : ""}
+            </div>`;
     });
 }
 
-/* ============================================================
-    TEMPLATE UPLOAD
-============================================================ */
+// =========================================================
+//  TEMPLATE UPLOAD
+// =========================================================
 async function uploadTemplate() {
-    const file = templateUpload.files[0];
-    if(!file) return alert("Pilih file!");
+    let file = templateUpload.files[0];
+    if (!file) return alert("Pilih file!");
 
-    const reader = new FileReader();
+    let reader = new FileReader();
     reader.onload = async e => {
-        const base64Data = e.target.result;
+        templateBase64 = e.target.result;
+        loadTemplateFromBase64(templateBase64);
 
-        // PASTIKAN HEADER INI ADA!
-        const res = await fetch(API,{ 
-            method:"POST",
-            headers: { 'Content-Type': 'application/json' }, // <-- KRITIS!
-            body:JSON.stringify({template: base64Data})
-        });
-        
-        // Cek hasil respons dari Apps Script
-        const result = await res.json();
-        
-        if (result.status === 'success') {
-            loadTemplateFromBase64(base64Data);
-            alert("Template berhasil disimpan!");
-        } else {
-            // Menampilkan error jika Apps Script gagal
-            alert("Template gagal disimpan! Server error: " + result.message);
-        }
+        await saveDataToServer();
+        alert("Template disimpan!");
     };
+
     reader.readAsDataURL(file);
 }
-
-// Muat data saat halaman dimuat pertama kali
-loadCertificates();
-
 </script>
+
 </body>
 </html>
